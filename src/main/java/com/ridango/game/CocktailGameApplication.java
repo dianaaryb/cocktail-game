@@ -10,7 +10,7 @@ import java.io.IOException;
 @SpringBootApplication
 public class CocktailGameApplication implements CommandLineRunner {
 
-	public static void main(String[] args) throws IOException, ParseException {
+	public static void main(String[] args) {
 		SpringApplication.run(CocktailGameApplication.class, args);
 		Engine engine = new Engine();
 		engine.run();

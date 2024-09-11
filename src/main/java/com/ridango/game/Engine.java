@@ -1,9 +1,7 @@
 package com.ridango.game;
 
 import lombok.Getter;
-import org.json.simple.parser.ParseException;
 
-import java.io.IOException;
 import java.util.Random;
 
 public class Engine {
@@ -16,8 +14,8 @@ public class Engine {
     @Getter
     private boolean showAdditionalInfo = false;
 
-    public void run() throws IOException, ParseException {
-        state = new GameState(CocktailDatabaseCommunicator.getTenRandomCocktails());
+    public void run() {
+        state = new GameState(CocktailDatabaseCommunicator.getTenRandomCocktails(), HighScoreFileHandler.readNumberFromFile(HighScoreFileHandler.FILE_PATH));
         ui.addStartEventListener(() -> startGame());
         ui.addSkipEventListener(() -> skipRound());
         ui.addCocktailNameEntryEventListener(() -> checkCocktailName());
@@ -26,27 +24,29 @@ public class Engine {
 
     public void startGame() {
         if (ui.getUserResponse().equals("s")) {
-            cocktailName = state.getCurrentCocktail().getName().replaceAll("[a-zA-Z]", "_");
             while(roundNumber < 5)
             {
+                if(roundNumber == 0){
+                    cocktailName = state.getCurrentCocktail().getName().replaceAll("\\S", "_");
+                }
                 if(ui.getUserResponse().equals("0")){
+                    updateScore();
                     gameIsOver();
                 }
-                ui.drawField(cocktailName, state, this);
-//                showAdditionalInfo = false;
-                if (showAdditionalInfo) {
-                    ui.displayAdditionalInfo(state);
-                    showAdditionalInfo = false;
-                }
+                ui.drawField(cocktailName, state);
             }
-            try{
-                HighScoreFileHandler.updateNumberInFile(state.getScore());
-            }catch (Exception e){
-                System.out.println("Failed to check");
-            }
+            updateScore();
             gameIsOver();
         } else {
             gameIsOver();
+        }
+    }
+
+    private void updateScore() {
+        try{
+            HighScoreFileHandler.updateNumberInFile(state.getScore());
+        }catch (Exception e){
+            System.out.println("Failed to check");
         }
     }
 
@@ -57,13 +57,16 @@ public class Engine {
 
     public void skipRound() {
         state.restoreAttempts();
+        if (state.getCurrentCocktailIndex() == state.cocktailCount()) {
+            state.addNewCocktails(CocktailDatabaseCommunicator.getTenRandomCocktails());
+        }
         state.nextCocktail();
         cocktailName = "_".repeat(state.getCurrentCocktail().getName().length());
         if (roundNumber >= 5) {
             gameIsOver();
         } else {
             roundNumber = 0;
-            ui.drawField(cocktailName, state, this);
+            ui.drawField(cocktailName, state);
         }
     }
 
@@ -71,22 +74,23 @@ public class Engine {
         if(ui.getUserResponse().equals("5")){
             ui.skipEventListener.run();
         } else if (ui.getUserResponse().toLowerCase().equals(state.getCurrentCocktail().getName().toLowerCase())) {
+            ui.disableAdditionalInfo();
             roundNumber = 0;
             state.increaseScore();
             state.restoreAttempts();
+            if (state.getCurrentCocktailIndex() == state.cocktailCount() - 1) {
+                state.addNewCocktails(CocktailDatabaseCommunicator.getTenRandomCocktails());
+            }
             state.nextCocktail();
             cocktailName = "_".repeat(state.getCurrentCocktail().getName().length());
-//            ui.drawField(cocktailName, state.getCurrentCocktail().getInstructions(), state.getCurrentCocktail().getName());
         } else {
             roundNumber++;
             state.decreaseAttempts();
             revealLetter();
             if(state.getAttempts() > 1 && !ui.getUserResponse().equals("0")){
-                showAdditionalInfo = true;
+                ui.enableAdditionalInfo();
             }
-//            ui.drawField(cocktailName, state.getCurrentCocktail().getInstructions(), state.getCurrentCocktail().getName());
         }
-//        System.out.println("szdfghjsxzcdvfgbhnj"); //proverit skolko raz soobshenije visvetitsja v oboix sluchajax
     }
 
     public void revealLetter() {

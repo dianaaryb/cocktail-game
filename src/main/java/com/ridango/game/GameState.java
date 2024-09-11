@@ -1,7 +1,6 @@
 package com.ridango.game;
 
 import lombok.Getter;
-import lombok.Setter;
 
 import java.util.List;
 
@@ -14,11 +13,15 @@ public class GameState {
     private List<Cocktail> cocktails;
     @Getter
     private Cocktail currentCocktail;
+    @Getter
     private int currentCocktailIndex = 0;
+    @Getter
+    private int highScore;
 
-    public GameState(List<Cocktail> cocktails) {
+    public GameState(List<Cocktail> cocktails, int highScore) {
         this.cocktails = cocktails;
         currentCocktail = cocktails.get(currentCocktailIndex);
+        this.highScore = highScore;
     }
 
     public void increaseScore() {
@@ -35,5 +38,14 @@ public class GameState {
 
     public void nextCocktail() {
         currentCocktail = cocktails.get(++currentCocktailIndex);
+    }
+
+    public int cocktailCount() {
+        return cocktails.size();
+    }
+
+    public void addNewCocktails(List<Cocktail> newCocktails) {
+        currentCocktailIndex = 0;
+        cocktails.addAll(newCocktails);
     }
 }
