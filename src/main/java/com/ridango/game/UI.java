@@ -7,9 +7,8 @@ import java.util.Scanner;
 public class UI {
 
     Scanner scanner = new Scanner(System.in);
-    Runnable startEventListener;
-    Runnable skipEventListener;
-    Runnable cocktailNameEntryEventListener;
+    private Runnable startEventListener;
+    private Runnable cocktailNameEntryEventListener;
     @Getter
     private String userResponse;
     private boolean showAdditionalInfo = false;
@@ -55,6 +54,10 @@ public class UI {
         }
     }
 
+    public void printGameOverMessage() {
+        System.out.println("Game is over!");
+    }
+
     public void printEmptyLine(int times) {
         for (int i = 0; i < times; i++) {
             System.out.println();
@@ -63,10 +66,6 @@ public class UI {
 
     public void addStartEventListener(Runnable runnable) {
         startEventListener = runnable;
-    }
-
-    public void addSkipEventListener(Runnable runnable) {
-        skipEventListener = runnable;
     }
 
     public void addCocktailNameEntryEventListener(Runnable runnable) {

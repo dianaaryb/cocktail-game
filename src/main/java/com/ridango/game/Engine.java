@@ -6,85 +6,86 @@ import java.util.Random;
 
 public class Engine {
 
-    private UI ui = new UI();
+    private final UI ui = new UI();
     private GameState state;
-    private String cocktailName;
-    @Getter
-    private int roundNumber = 0;
+    private String cocktailNameToDisplay;
     @Getter
     private boolean showAdditionalInfo = false;
 
     public void run() {
         state = new GameState(CocktailDatabaseCommunicator.getTenRandomCocktails(), HighScoreFileHandler.readNumberFromFile(HighScoreFileHandler.FILE_PATH));
         ui.addStartEventListener(() -> startGame());
-        ui.addSkipEventListener(() -> skipRound());
         ui.addCocktailNameEntryEventListener(() -> checkCocktailName());
         ui.displayGameStart();
     }
 
     public void startGame() {
         if (ui.getUserResponse().equals("s")) {
-            while(roundNumber < 5)
+            while(state.getRoundNumber() < 5)
             {
-                if(roundNumber == 0){
-                    cocktailName = state.getCurrentCocktail().getName().replaceAll("\\S", "_");
+                if(state.getRoundNumber()  == 0){
+                    cocktailNameToDisplay = state.getCurrentCocktail().getName().replaceAll("\\S", "_");
                 }
                 if(ui.getUserResponse().equals("0")){
-                    updateScore();
-                    gameIsOver();
+                    break;
                 }
-                ui.drawField(cocktailName, state);
+                ui.drawField(cocktailNameToDisplay, state);
             }
-            updateScore();
-            gameIsOver();
-        } else {
-            gameIsOver();
         }
+        updateScore();
+        gameOver();
     }
 
     private void updateScore() {
-        try{
+        try {
             HighScoreFileHandler.updateNumberInFile(state.getScore());
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println("Failed to check");
         }
     }
 
-    private static void gameIsOver() {
-        System.out.println("Game is over!");
+    private void gameOver() {
+        ui.printGameOverMessage();
         System.exit(1);
     }
 
     public void skipRound() {
         state.restoreAttempts();
-        if (state.getCurrentCocktailIndex() == state.cocktailCount()) {
+        if (hasPlayedAllCocktails()) {
             state.addNewCocktails(CocktailDatabaseCommunicator.getTenRandomCocktails());
         }
         state.nextCocktail();
-        cocktailName = "_".repeat(state.getCurrentCocktail().getName().length());
-        if (roundNumber >= 5) {
-            gameIsOver();
+        cocktailNameToDisplay = getHiddenCocktailName();
+        if (state.getRoundNumber() >= 5) {
+            gameOver();
         } else {
-            roundNumber = 0;
-            ui.drawField(cocktailName, state);
+            state.setRoundNumber(0);
         }
+    }
+
+    private String getHiddenCocktailName() {
+        return state.getCurrentCocktail().getName().replaceAll("\\S", "_");
+    }
+
+    private boolean hasPlayedAllCocktails() {
+        return state.getCurrentCocktailIndex() == state.cocktailCount() - 1;
     }
 
     public void checkCocktailName() {
         if(ui.getUserResponse().equals("5")){
-            ui.skipEventListener.run();
-        } else if (ui.getUserResponse().toLowerCase().equals(state.getCurrentCocktail().getName().toLowerCase())) {
+            skipRound();
+        } else if (ui.getUserResponse().equalsIgnoreCase(state.getCurrentCocktail().getName())) {
             ui.disableAdditionalInfo();
-            roundNumber = 0;
+            state.setRoundNumber(0);
             state.increaseScore();
             state.restoreAttempts();
-            if (state.getCurrentCocktailIndex() == state.cocktailCount() - 1) {
+            if (hasPlayedAllCocktails()) {
                 state.addNewCocktails(CocktailDatabaseCommunicator.getTenRandomCocktails());
             }
             state.nextCocktail();
-            cocktailName = "_".repeat(state.getCurrentCocktail().getName().length());
+            cocktailNameToDisplay = "_".repeat(state.getCurrentCocktail().getName().length());
         } else {
-            roundNumber++;
+            state.increaseRoundNumber();
             state.decreaseAttempts();
             revealLetter();
             if(state.getAttempts() > 1 && !ui.getUserResponse().equals("0")){
@@ -98,8 +99,8 @@ public class Engine {
         while (true) {
             int charPosition = random.nextInt(state.getCurrentCocktail().getName().length());
             char charOnPosition = state.getCurrentCocktail().getName().charAt(charPosition);
-            if (cocktailName.charAt(charPosition) == '_') {
-                cocktailName = cocktailName.substring(0, charPosition) + charOnPosition + cocktailName.substring(charPosition + 1);
+            if (cocktailNameToDisplay.charAt(charPosition) == '_') {
+                cocktailNameToDisplay = cocktailNameToDisplay.substring(0, charPosition) + charOnPosition + cocktailNameToDisplay.substring(charPosition + 1);
                 return;
             }
         }
