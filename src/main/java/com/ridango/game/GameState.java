@@ -1,6 +1,7 @@
 package com.ridango.game;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 

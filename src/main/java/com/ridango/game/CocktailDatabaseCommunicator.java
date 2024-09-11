@@ -33,19 +33,7 @@ public class CocktailDatabaseCommunicator {
             JSONObject jsonObject = (JSONObject) parser.parse(jsonResponse);
             String drinkData = ((JSONArray) jsonObject.get("drinks")).get(0).toString();
             JSONObject jsonObject2 = (JSONObject) parser.parse(drinkData);
-            String name = (String) jsonObject2.get("strDrink");
-            String category = (String) jsonObject2.get("strCategory");
-            String glass = (String) jsonObject2.get("strGlass");
-            String instructions = (String) jsonObject2.get("strInstructions");
-            List<String> ingredients = new ArrayList<>();
-            for (int i = 1; ;i++) {
-                String ingredient = (String) jsonObject2.get("strIngredient" + i);
-                if (ingredient == null) {
-                    break;
-                }
-                ingredients.add(ingredient);
-            }
-            cocktails.add(new Cocktail(name, instructions, category, glass, ingredients));
+            JsonParser.parseJson(jsonObject2, cocktails);
         }
         return cocktails;
     }

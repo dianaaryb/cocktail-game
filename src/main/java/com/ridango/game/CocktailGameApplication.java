@@ -11,10 +11,7 @@ import java.io.IOException;
 public class CocktailGameApplication implements CommandLineRunner {
 
 	public static void main(String[] args) throws IOException, ParseException {
-		System.out.println("Hello, Ridango!");
 		SpringApplication.run(CocktailGameApplication.class, args);
-//		CocktailDatabaseCommunicator communicator = new CocktailDatabaseCommunicator();
-//		communicator.getTenRandomCocktails();
 		Engine engine = new Engine();
 		engine.run();
 	}

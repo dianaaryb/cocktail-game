@@ -3,12 +3,10 @@ package com.ridango.game;
 import lombok.Getter;
 
 import java.util.List;
-
+@Getter
 public class Cocktail {
 
-    @Getter
     private String name;
-    @Getter
     private String instructions;
     private String category;
     private String glass;
