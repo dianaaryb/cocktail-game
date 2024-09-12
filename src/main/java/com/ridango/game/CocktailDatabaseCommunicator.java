@@ -6,9 +6,7 @@ import org.json.simple.parser.JSONParser;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class CocktailDatabaseCommunicator {
 
@@ -17,6 +15,7 @@ public class CocktailDatabaseCommunicator {
 
     public static List<Cocktail> getTenRandomCocktails() {
         List<Cocktail> cocktails = new ArrayList<>();
+        Set<String> cocktailNames = new HashSet<>();
         try {
             URL url = new URL(RANDOM_COCKTAILS_URL);
             HttpURLConnection urlConnection;
@@ -39,9 +38,12 @@ public class CocktailDatabaseCommunicator {
                     System.out.println("Error: No cocktails available from API");
                     return cocktails;
                 }
-                String drinkData = drinksArray.get(0).toString();
-                JSONObject jsonObject2 = (JSONObject) parser.parse(drinkData);
-                JsonParser.parseJson(jsonObject2, cocktails);
+                JSONObject drinkObject = (JSONObject) drinksArray.get(0);
+                String cocktailName = drinkObject.get("strDrink").toString();
+                if (!cocktailNames.contains(cocktailName)) {
+                    JsonParser.parseJson(drinkObject, cocktails);
+                    cocktailNames.add(cocktailName);
+                }
             }
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());

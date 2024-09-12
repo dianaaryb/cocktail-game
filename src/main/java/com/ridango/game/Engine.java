@@ -9,8 +9,6 @@ public class Engine {
     private final UI ui = new UI();
     private GameState state;
     private String cocktailNameToDisplay;
-    @Getter
-    private boolean showAdditionalInfo = false;
 
     public void run() {
         state = new GameState(CocktailDatabaseCommunicator.getTenRandomCocktails(), HighScoreFileHandler.readNumberFromFile(HighScoreFileHandler.FILE_PATH));
@@ -56,6 +54,7 @@ public class Engine {
         }
         state.nextCocktail();
         cocktailNameToDisplay = getHiddenCocktailName();
+        ui.disableAdditionalInfo();
         if (state.getRoundNumber() >= 5) {
             gameOver();
         } else {

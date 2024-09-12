@@ -36,7 +36,6 @@ public class UI {
         if(showAdditionalInfo){
             displayAdditionalInfo(state);
         }
-        System.out.println(state.getCurrentCocktail().getName());
         System.out.println("Enter cocktail name: " + displayableName);
         userResponse = scanner.nextLine();
         cocktailNameEntryEventListener.run();
