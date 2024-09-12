@@ -6,23 +6,28 @@ import org.json.simple.parser.JSONParser;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Set;
 
 public class CocktailDatabaseCommunicator {
 
     private static final String RANDOM_COCKTAILS_URL = "https://www.thecocktaildb.com/api/json/v1/1/random.php";
     private static final String GET_REQUEST = "GET";
+    private static final Set<String> cocktailNames = new HashSet<>();
+    public static final int STATUS_CODE_OK = 200;
 
     public static List<Cocktail> getTenRandomCocktails() {
         List<Cocktail> cocktails = new ArrayList<>();
-        Set<String> cocktailNames = new HashSet<>();
         try {
             URL url = new URL(RANDOM_COCKTAILS_URL);
             HttpURLConnection urlConnection;
             while(cocktails.size() < 10) {
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod(GET_REQUEST);
-                if(urlConnection.getResponseCode() != 200){
+                if(urlConnection.getResponseCode() != STATUS_CODE_OK){
                     System.out.println("Error: Could not connect to API");
                     return null;
                 }

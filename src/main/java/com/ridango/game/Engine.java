@@ -1,33 +1,25 @@
 package com.ridango.game;
 
-import lombok.Getter;
-
-import java.util.Random;
-
 public class Engine {
 
     private final UI ui = new UI();
     private GameState state;
-    private String cocktailNameToDisplay;
 
     public void run() {
-        state = new GameState(CocktailDatabaseCommunicator.getTenRandomCocktails(), HighScoreFileHandler.readNumberFromFile(HighScoreFileHandler.FILE_PATH));
+        state = new GameState(CocktailDatabaseCommunicator.getTenRandomCocktails(), HighScoreFileHandler.readNumberFromFile());
         ui.addStartEventListener(() -> startGame());
         ui.addCocktailNameEntryEventListener(() -> checkCocktailName());
         ui.displayGameStart();
     }
 
     public void startGame() {
-        if (ui.getUserResponse().equals("s")) {
+        if (ui.getUserResponse().equalsIgnoreCase("s")) {
             while(state.getRoundNumber() < 5)
             {
-                if(state.getRoundNumber()  == 0){
-                    cocktailNameToDisplay = state.getCurrentCocktail().getName().replaceAll("\\S", "_");
-                }
                 if(ui.getUserResponse().equals("0")){
                     break;
                 }
-                ui.drawField(cocktailNameToDisplay, state);
+                ui.drawField(state);
             }
         }
         updateScore();
@@ -38,7 +30,7 @@ public class Engine {
         try {
             HighScoreFileHandler.updateNumberInFile(state.getScore());
         } catch (Exception e) {
-            System.out.println("Failed to check");
+            System.out.println("Failed to update the score in the file");
         }
     }
 
@@ -53,17 +45,12 @@ public class Engine {
             state.addNewCocktails(CocktailDatabaseCommunicator.getTenRandomCocktails());
         }
         state.nextCocktail();
-        cocktailNameToDisplay = getHiddenCocktailName();
         ui.disableAdditionalInfo();
         if (state.getRoundNumber() >= 5) {
             gameOver();
         } else {
             state.setRoundNumber(0);
         }
-    }
-
-    private String getHiddenCocktailName() {
-        return state.getCurrentCocktail().getName().replaceAll("\\S", "_");
     }
 
     private boolean hasPlayedAllCocktails() {
@@ -82,25 +69,12 @@ public class Engine {
                 state.addNewCocktails(CocktailDatabaseCommunicator.getTenRandomCocktails());
             }
             state.nextCocktail();
-            cocktailNameToDisplay = "_".repeat(state.getCurrentCocktail().getName().length());
         } else {
             state.increaseRoundNumber();
             state.decreaseAttempts();
-            revealLetter();
+            state.revealLetter();
             if(state.getAttempts() > 1 && !ui.getUserResponse().equals("0")){
                 ui.enableAdditionalInfo();
-            }
-        }
-    }
-
-    public void revealLetter() {
-        Random random = new Random();
-        while (true) {
-            int charPosition = random.nextInt(state.getCurrentCocktail().getName().length());
-            char charOnPosition = state.getCurrentCocktail().getName().charAt(charPosition);
-            if (cocktailNameToDisplay.charAt(charPosition) == '_') {
-                cocktailNameToDisplay = cocktailNameToDisplay.substring(0, charPosition) + charOnPosition + cocktailNameToDisplay.substring(charPosition + 1);
-                return;
             }
         }
     }

@@ -6,7 +6,7 @@ import java.util.Scanner;
 
 public class UI {
 
-    Scanner scanner = new Scanner(System.in);
+    private final Scanner scanner = new Scanner(System.in);
     private Runnable startEventListener;
     private Runnable cocktailNameEntryEventListener;
     @Getter
@@ -24,7 +24,7 @@ public class UI {
         startEventListener.run();
     }
 
-    public void drawField(String displayableName, GameState state) {
+    public void drawField(GameState state) {
         printEmptyLine(4);
         System.out.println("ˆˆˆˆˆPress 5 for skip roundˆˆˆˆˆ");
         System.out.println("ˆˆˆˆˆPress 0 to quit the gameˆˆˆˆˆ");
@@ -36,7 +36,7 @@ public class UI {
         if(showAdditionalInfo){
             displayAdditionalInfo(state);
         }
-        System.out.println("Enter cocktail name: " + displayableName);
+        System.out.println("Enter cocktail name: " + state.getCocktailNameToDisplay());
         userResponse = scanner.nextLine();
         cocktailNameEntryEventListener.run();
     }
@@ -51,6 +51,7 @@ public class UI {
                 System.out.print(", ");
             }
         }
+        System.out.print("\n");
     }
 
     public void printGameOverMessage() {
